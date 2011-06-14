@@ -37,6 +37,9 @@ globalVars.input = userInput(globalVars.input, globalVars.Gvars);
 % set control variables
 [globalVars.input, globalVars.Gvars] = initControlVars(globalVars.input, globalVars.Gvars);
 
+% save globalVars structure for use in different files
+save globalVars.mat globalVars 
+
 % set the boundaries
 LB = zeros(1,Nvariables);
 UB = 100*ones(1,Nvariables);
@@ -78,7 +81,9 @@ options = gaoptimset(options,'Vectorized','off');
 options = gaoptimset(options,'PlotFcns',@gaplotpareto);
 
 %% Run GA
-% gamultiobj: 
+% gamultiobj: multiobjective optimization using genetic algorithm.
+% ga: finds a local minimum X to the function fitnessFunction
+%
 % X = finds a Pareto set X of the objective fitnessFunction 
 %     with optimization parameters specified in options
 % FVAL = matrix that contains the value of all the objective functions 
@@ -91,7 +96,7 @@ options = gaoptimset(options,'PlotFcns',@gaplotpareto);
 % POPULATION = final population at termination
 % SCORE = the score of the final population
 
-% ga: finds a local minimum X to the function fitnessFunction
+
    
 if(globalVars.nObjectives > 1)
     [X,FVAL,REASON,OUTPUT,POPULATION,SCORE] = gamultiobj(fitnessFunction,Nvariables,[],[],[],[],[],[],options);
@@ -99,5 +104,5 @@ else
     [X,FVAL,REASON,OUTPUT,POPULATION,SCORE] = ga(fitnessFunction,Nvariables,options);
 end
 
-save BestInd X FVAL REASON OUTPUT POPULATION SCORE
+%save BestInd X FVAL REASON OUTPUT POPULATION SCORE
 
