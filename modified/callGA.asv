@@ -1,0 +1,102 @@
+% Main function of the flapping top optimization
+% Takes initial user input, sets GA parameters, and calls GA optimizing function 
+
+clear all;
+clc;
+
+% prepend libraries to Matlab search path
+path('./mapLS',path);                      % path to the MLS library
+path('./MATLAB/etc/',path);
+
+% structure holding all global variables
+globalVars = struct;
+glovalVars.savestate = [];
+globalVars.Gvars = struct;
+globalVars.nObjectives = [];
+globalVars.smallN = 1e-6;
+globalVars.input = struct;
+globalVars.globalVal = [];
+
+% GA settings
+nGenera = 500;
+EliteCount = 10;
+PopSize = 500;
+
+% set GA settings and initialize Gvars
+globalVars.Gvars = config(globalVars.Gvars);
+
+% Number of variables
+Nvariables = (globalVars.Gvars.Nletters * globalVars.Gvars.NLetterperRule) * ...
+    globalVars.Gvars.Ncodes + globalVars.Gvars.NinitEdges + globalVars.Gvars.nB;
+
+% Restart file
+restartFromFile = [];
+
+% set user input variables
+globalVars.input = userInput(globalVars.input, globalVars.Gvars);
+% set control variables
+[globalVars.input, globalVars.Gvars] = initControlVars(globalVars.input, globalVars.Gvars);
+
+% set the boundaries
+LB = zeros(1,Nvariables);
+UB = 100*ones(1,Nvariables);
+bounds = [LB,UB];
+
+ if(~isempty(restartFromFile))
+     load(restartFromFile);
+     aux =  savestate{end};
+     popInit = savestate{end}.Population;    
+     scoreInit = savestate{end}.Score;
+     savestate = [];
+     savestate{1} = aux;
+ else
+     popInit = [];    
+     scoreInit = [];
+ end
+ 
+% fitness function
+fitnessFunction = @fitness_out;
+ 
+% Start with default options
+options = gaoptimset;
+
+%% Modify some optimization parameters
+options = gaoptimset(options,'Generations' ,nGenera);
+options = gaoptimset(options,'StallGenLimit' ,nGenera);
+options = gaoptimset(options,'EliteCount', EliteCount);
+options = gaoptimset(options,'CrossoverFraction', 0.8);
+options = gaoptimset(options,'PopInitRange' ,[LB;UB]);
+options = gaoptimset(options,'InitialPopulation' ,popInit);
+options = gaoptimset(options,'InitialScores' ,scoreInit);
+options = gaoptimset(options,'PopulationSize' ,PopSize);
+options = gaoptimset(options,'StallTimeLimit' ,Inf);
+options = gaoptimset(options,'MutationFcn' ,@mutationgaussianRangeU);
+options = gaoptimset(options,'Display' ,'off');
+options = gaoptimset(options,'OutputFcns' ,{@gaoutputfcnFSIwing});
+options = gaoptimset(options,'CrossoverFcn',@crossoverscattered);
+options = gaoptimset(options,'Vectorized','off');
+options = gaoptimset(options,'PlotFcns',@gaplotpareto);
+
+%% Run GA
+% gamultiobj: 
+% X = finds a Pareto set X of the objective fitnessFunction 
+%     with optimization parameters specified in options
+% FVAL = matrix that contains the value of all the objective functions 
+%        defined in fitnessFunction at all the solutions in X. 
+%        FVAL has numberOfObjectives columns and same number of rows as does X.
+% REASON = exit flag of gamultiobj (1, 0, -1, -2, -5)
+% OUTPUT = structure containing state of the random number generator before
+%          GA started, number of generations, number of function evaluations, 
+%          maximum constraint violation, if any, and termination message
+% POPULATION = final population at termination
+% SCORE = the score of the final population
+
+% ga: 
+if(globalVars.nObjectives > 1)
+    [X,FVAL,REASON,OUTPUT,POPULATION,SCORE] = gamultiobj(fitnessFunction,Nvariables,[],[],[],[],[],[],options);
+else
+    [X,FVAL,REASON,OUTPUT,POPULATION,SCORE] = ga(fitnessFunction,Nvariables,options);
+end
+
+save BestInd X FVAL REASON OUTPUT POPULATION SCORE
+
