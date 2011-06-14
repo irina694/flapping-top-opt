@@ -1,0 +1,19 @@
+close all
+clear all
+
+global Gvars input smallN
+
+smallN = 1e-6;
+
+config
+userInput
+initControlVars(input)
+
+LB=zeros(1,Nvariables);
+UB=100*ones(1,Nvariables);
+bounds=[LB,UB];
+
+x = (UB-LB).*rand(1,Nvariables)+LB;
+
+%% Evaluate Fitness
+[g,coverage] = evaluate_fitness(x);

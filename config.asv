@@ -1,0 +1,57 @@
+path('./mapLS',path);                   % path to the MLS library
+path('./MATLAB/etc/',path);
+
+%% number of variables
+Gvars.Nh = 20;
+Gvars.Nletters = 20;
+Gvars.NLetterperRule = 8;
+Gvars.Ncodes = 9;
+Gvars.NinitEdges = 4;
+Gvars.Nlevels = 4;
+% fraction of the tip with shell
+Gvars.nB = 1;
+
+%% Number of variables
+Nvariables = (Gvars.Nletters*Gvars.NLetterperRule)*Gvars.Ncodes+Gvars.NinitEdges+Gvars.nB;
+
+%% Wing geometry
+
+Gvars.M = 5;  % # of chordwise panels
+Gvars.N = 15;  % # of spanwise panels
+
+Gvars.c = .05;  % chord
+Gvars.b = .2;  % span
+
+Gvars.cutoff = 1E-9;  % cutoff radius where the Biot-Savart does not act
+
+%% Wing Structure:
+
+Gvars.E_modulus = 40E9;
+Gvars.poisson = 0.3;
+Gvars.rho_wing = 1400;
+Gvars.damping = 10;
+Gvars.t_min = 0.0001;
+Gvars.t_max = 0.002;
+
+%% External flow conditions:
+
+Gvars.V_ref = 10;  % U velocity, and reference for some terms
+Gvars.rho = 1.225;
+
+%% Specify kinematics:
+
+Gvars.omega = 25;  % frequency, rad/s
+
+Gvars.flap_amp = 45;
+Gvars.plunge_amp = 0;
+Gvars.pitch_angle = 0;
+
+%% Time steps:
+
+Gvars.N_per = 50;
+Gvars.N_cycles = 3;
+Gvars.N_w = 10;  % number of deforming wake rows
+
+%% Error tolerances
+
+aero_tol = -5;
